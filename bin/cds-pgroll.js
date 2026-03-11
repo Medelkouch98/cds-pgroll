@@ -176,36 +176,42 @@ async function main() {
       try {
         const sql = new PgRollSql(client, config.schema);
         const health = await sql.healthCheck();
+        const migrations = await sql.getMigrations();
+        const completedMigrations = migrations.filter(m => m.done);
 
         console.log('\n  Migration Status');
         console.log('  ================');
         console.log(`  Schema: ${config.schema}`);
-        console.log(`  Tracking initialized: ${health.initialized}`);
+        console.log(`  Status: ${health.status}`);
+        console.log(`  Healthy: ${health.healthy}`);
 
-        if (health.initialized) {
-          console.log(`  Applied migrations: ${health.migrationCount}`);
-          console.log(`  Last migration: ${health.lastMigration}`);
-          console.log(`  Last applied at: ${health.lastAppliedAt}`);
+        if (health.status !== 'not_initialized') {
+          console.log(`  Applied migrations: ${completedMigrations.length}`);
+          console.log(`  Current version: ${health.currentVersion || '(none)'}`);
 
-          // Check for pending
+          if (health.pending && health.pending.length > 0) {
+            console.log(`\n  In-progress migrations (${health.pending.length}):`);
+            health.pending.forEach(name => console.log(`    - ${name}`));
+          }
+
+          // Check for unapplied migration files on disk
           const migrationFiles = fs.readdirSync(config.migrationsDir)
-            .filter(f => f.endsWith('.json') && !f.startsWith('.'))
+            .filter(f => f.endsWith('.json') && !f.startsWith('.') && f !== 'package.json')
             .sort();
-          const applied = await sql.getMigrations();
-          const appliedNames = new Set(applied.map(m => m.name));
-          const pending = migrationFiles.filter(f => {
+          const appliedNames = new Set(migrations.map(m => m.name));
+          const pendingFiles = migrationFiles.filter(f => {
             const name = f.replace('.json', '');
             return !appliedNames.has(name);
           });
 
-          if (pending.length > 0) {
-            console.log(`\n  Pending migrations (${pending.length}):`);
-            pending.forEach(f => console.log(`    - ${f}`));
+          if (pendingFiles.length > 0) {
+            console.log(`\n  Pending migration files (${pendingFiles.length}):`);
+            pendingFiles.forEach(f => console.log(`    - ${f}`));
           } else {
-            console.log('\n  All migrations applied.');
+            console.log('\n  All migration files applied.');
           }
         } else {
-          console.log('  Run "cds-pgroll apply" to initialize.');
+          console.log('  pgroll schema not initialized. Run "cds-pgroll apply" to initialize.');
         }
       } finally {
         await client.end();

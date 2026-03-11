@@ -83,18 +83,24 @@ Add to your `package.json`:
 ```json
 {
   "cds-pgroll": {
-    "schema": "cap_tva",
+    "schema": "cap_project",
     "migrationsDir": "migrations",
     "schemaPath": "db/schema.cds",
     "dataDir": "db/data",
+    "deployerDir": "gen/pg",
     "schemaEvolution": "alter"
   }
 }
 ```
 
-Or use environment variables:
-- `CAP_DB_SCHEMA` — PostgreSQL schema name
-- `CAP_SCHEMA_EVOLUTION` — Schema evolution mode
+| Key | Default | Description |
+|-----|---------|-------------|
+| `schema` | `'public'` | PostgreSQL schema name (falls back to `cds.requires.db.schema`) |
+| `migrationsDir` | `'migrations'` | Directory for migration JSON files |
+| `schemaPath` | `'db/schema.cds'` | Path to CDS schema file |
+| `dataDir` | `'db/data'` | Path to CSV seed data directory |
+| `deployerDir` | `'gen/pg'` | Path to CAP db-deployer build output |
+| `schemaEvolution` | `'alter'` | CDS schema evolution mode |
 
 ## Migration File Format
 
@@ -106,7 +112,7 @@ Migration files are JSON with a `name` and `operations` array:
   "operations": [
     {
       "drop_column": {
-        "table": "CAP_TVA_DB_FINANCIALDOCUMENTS",
+        "table": "CAP_PROJECT_DB_FINANCIALDOCUMENTS",
         "column": "paymentcategory",
         "down": "SELECT NULL"
       }
@@ -206,11 +212,11 @@ await sql.initializeSchema();
 
 // Query migrations
 const migrations = await sql.getMigrations();
-const pending = await sql.getPendingMigrations(['file1', 'file2']);
+const pending = await sql.getPendingMigrations();
 const health = await sql.healthCheck();
 
 // Record a migration
-await sql.recordMigration('my_migration', [{ drop_table: { table: 'T' } }]);
+await sql.recordMigration('my_migration');
 ```
 
 ## CDS Type Mapping
@@ -218,10 +224,10 @@ await sql.recordMigration('my_migration', [{ drop_table: { table: 'T' } }]);
 | CDS Type | PostgreSQL Type |
 |----------|----------------|
 | `cds.UUID` | `VARCHAR(36)` |
-| `cds.String` | `VARCHAR(length)` or `VARCHAR(5000)` |
+| `cds.String` | `VARCHAR(length)` or `VARCHAR(255)` |
 | `cds.LargeString` | `TEXT` |
 | `cds.Integer` | `INTEGER` |
-| `cds.Integer64` | `BIGINT` |
+| `cds.Int64` | `BIGINT` |
 | `cds.Decimal` | `DECIMAL(p,s)` or `DECIMAL` |
 | `cds.Double` | `FLOAT8` |
 | `cds.Boolean` | `BOOLEAN` |

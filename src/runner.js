@@ -20,7 +20,7 @@ const fs = require('fs');
 const path = require('path');
 const { detectSchemaChanges, parseStoredCSN } = require('./csn-diff');
 const { applyOperation } = require('./operations');
-const PgRollSql = require('./sql');
+const { PgRollSql } = require('./sql');
 
 /**
  * Get PostgreSQL connection config from VCAP_SERVICES (Cloud Foundry).

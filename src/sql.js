@@ -166,4 +166,4 @@ class PgRollSql {
   }
 }
 
-module.exports = PgRollSql;
+module.exports = { PgRollSql };
