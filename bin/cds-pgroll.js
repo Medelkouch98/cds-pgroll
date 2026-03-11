@@ -156,7 +156,9 @@ async function main() {
               host: creds.hostname, port: creds.port,
               user: creds.username, password: creds.password,
               database: creds.dbname,
-              ssl: creds.sslrootcert ? { ca: creds.sslrootcert, rejectUnauthorized: false } : false,
+              ssl: creds.sslrootcert
+                ? { ca: creds.sslrootcert, rejectUnauthorized: false }
+                : (creds.sslRequired !== false ? { rejectUnauthorized: false } : false),
             };
           }
         }
