@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/Medelkouch98/cds-pgroll/compare/v1.0.4...v1.0.5) (2026-03-11)
+
+
+### Bug Fixes
+
+* improve SSL configuration handling in database connection ([b0f567b](https://github.com/Medelkouch98/cds-pgroll/commit/b0f567bbafdfcc3e2e3c3409ea43b7b5ec3a2cbb))
+
 ## [1.0.4](https://github.com/Medelkouch98/cds-pgroll/compare/v1.0.3...v1.0.4) (2026-03-11)
 
 
