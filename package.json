@@ -1,0 +1,69 @@
+{
+  "name": "@cds-pgroll/postgres",
+  "version": "1.0.0",
+  "description": "Hybrid schema migration library for SAP CAP + PostgreSQL. Complements @cap-js/postgres with DROP, RENAME, and destructive DDL operations via pgroll-compatible migrations.",
+  "main": "src/index.js",
+  "bin": {
+    "cds-pgroll": "./bin/cds-pgroll.js"
+  },
+  "scripts": {
+    "test": "jest --testTimeout=15000",
+    "test:watch": "jest --watchAll",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/ bin/ test/",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "sap",
+    "cap",
+    "cds",
+    "postgres",
+    "postgresql",
+    "pgroll",
+    "migration",
+    "schema-evolution",
+    "btp",
+    "cloud-foundry"
+  ],
+  "author": "Mohammed El kouch",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Medelkouch98/cds-pgroll.git"
+  },
+  "homepage": "https://github.com/Medelkouch98/cds-pgroll#readme",
+  "bugs": {
+    "url": "https://github.com/Medelkouch98/cds-pgroll/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
+  },
+  "peerDependencies": {
+    "@sap/cds": ">=7",
+    "@cap-js/postgres": ">=1"
+  },
+  "peerDependenciesMeta": {
+    "@sap/cds": {
+      "optional": false
+    },
+    "@cap-js/postgres": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "jest": "^30.0.0"
+  },
+  "files": [
+    "src/",
+    "bin/",
+    "examples/",
+    "README.md",
+    "LICENSE"
+  ]
+}

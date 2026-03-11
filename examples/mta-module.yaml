@@ -1,0 +1,96 @@
+# This is an example MTA module snippet showing how to integrate
+# @cds-pgroll/postgres into your Cloud Foundry deployment pipeline.
+#
+# The key insight: pgroll-migrator runs BEFORE the CAP db-deployer
+# to handle destructive DDL that CAP's schema_evolution: 'alter' cannot do.
+#
+# Add this to your mta.yaml build-parameters and modules sections.
+
+# ─── build-parameters ────────────────────────────────────────────
+# Add these to your before-all build commands:
+#
+# build-parameters:
+#   before-all:
+#     - builder: custom
+#       commands:
+#         - npm ci
+#         - npx cds build --production
+#         # Prepare db-deployer (strip CSVs, configure package.json)
+#         - npx cds-pgroll prepare
+#         # Switch to --model-only so CAP only updates cds_model, not DDL
+#         - 'sed -i ''s/"start": "cds-deploy"/"start": "cds-deploy --model-only"/'' gen/pg/package.json'
+#         # Copy migration runner and files to gen/migrations
+#         - mkdir -p gen/migrations
+#         - cp migrations/package.json gen/migrations/
+#         - cp migrations/run-pgroll.js gen/migrations/
+#         - bash -c "cp migrations/*.json gen/migrations/ 2>/dev/null; exit 0"
+#         - cp gen/pg/db/csn.json gen/migrations/csn.json
+
+# ─── Module: pgroll Migrator ─────────────────────────────────────
+# Runs as a CF task BEFORE the db-deployer.
+# Handles: DROP TABLE, DROP COLUMN, RENAME, CREATE TABLE (pgroll ops)
+# Also auto-detects removed entities/elements from CSN diff.
+
+- name: my-app-pgroll-migrator
+  type: nodejs
+  path: gen/migrations
+  parameters:
+    buildpack: nodejs_buildpack
+    memory: 256M
+    disk-quota: 256M
+    no-route: true
+    health-check-type: process
+    command: sleep infinity
+    no-start: true
+    tasks:
+      - name: run-pgroll-migrations
+        command: node run-pgroll.js
+        memory: 256M
+  properties:
+    CDS_CONFIG: |
+      {
+        "requires": {
+          "db": {
+            "credentials": {
+              "schema": "my_schema"
+            }
+          }
+        }
+      }
+  requires:
+    - name: my-app-db
+
+# ─── Module: CAP db-deployer ─────────────────────────────────────
+# Runs AFTER pgroll migrator (deployed-after).
+# Handles: ADD TABLE, ADD COLUMN, ALTER COLUMN (CAP capabilities)
+# Also updates the cds_model table for CSN tracking.
+
+- name: my-app-db-deployer
+  type: nodejs
+  path: gen/pg
+  deployed-after:
+    - my-app-pgroll-migrator    # <── CRITICAL: must run after pgroll
+  parameters:
+    buildpack: nodejs_buildpack
+    memory: 256M
+    disk-quota: 512M
+    no-route: true
+    health-check-type: process
+    command: sleep infinity
+    no-start: true
+    tasks:
+      - name: deploy-to-postgresql
+        command: npm start
+  properties:
+    CDS_CONFIG: |
+      {
+        "requires": {
+          "db": {
+            "credentials": {
+              "schema": "my_schema"
+            }
+          }
+        }
+      }
+  requires:
+    - name: my-app-db

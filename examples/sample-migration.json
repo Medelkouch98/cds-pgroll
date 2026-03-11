@@ -1,0 +1,12 @@
+{
+  "name": "20260311_120000_drop_payment_category",
+  "operations": [
+    {
+      "drop_column": {
+        "table": "CAP_TVA_DB_FINANCIALDOCUMENTS",
+        "column": "paymentcategory",
+        "down": "SELECT NULL"
+      }
+    }
+  ]
+}
