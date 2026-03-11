@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/Medelkouch98/cds-pgroll/compare/v1.0.2...v1.0.3) (2026-03-11)
+
+
+### Bug Fixes
+
+* local connection support, --model-only flag, accurate README ([0414ae8](https://github.com/Medelkouch98/cds-pgroll/commit/0414ae83f5a47bc5215d712cc4b2f615e51fda1f))
+
 ## [1.0.2](https://github.com/Medelkouch98/cds-pgroll/compare/v1.0.1...v1.0.2) (2026-03-11)
 
 
