@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/Medelkouch98/cds-pgroll/compare/v1.0.1...v1.0.2) (2026-03-11)
+
+
+### Bug Fixes
+
+* correct PgRollSql export, status command, and README accuracy ([d677a17](https://github.com/Medelkouch98/cds-pgroll/commit/d677a17953387180e07d8436844a3257bc11fc34))
+
 ## [1.0.1](https://github.com/Medelkouch98/cds-pgroll/compare/v1.0.0...v1.0.1) (2026-03-11)
 
 
