@@ -15,14 +15,10 @@
 #       commands:
 #         - npm ci
 #         - npx cds build --production
-#         # Prepare db-deployer (strip CSVs, configure package.json)
-#         - npx cds-pgroll prepare
-#         # Switch to --model-only so CAP only updates cds_model, not DDL
-#         - 'sed -i ''s/"start": "cds-deploy"/"start": "cds-deploy --model-only"/'' gen/pg/package.json'
-#         # Copy migration runner and files to gen/migrations
+#         # Prepare db-deployer: strip CSVs, set --model-only, configure schema
+#         - npx cds-pgroll prepare --model-only
+#         # Copy migration files and CSN to gen/migrations for the migrator module
 #         - mkdir -p gen/migrations
-#         - cp migrations/package.json gen/migrations/
-#         - cp migrations/run-pgroll.js gen/migrations/
 #         - bash -c "cp migrations/*.json gen/migrations/ 2>/dev/null; exit 0"
 #         - cp gen/pg/db/csn.json gen/migrations/csn.json
 
@@ -44,19 +40,8 @@
     no-start: true
     tasks:
       - name: run-pgroll-migrations
-        command: node run-pgroll.js
+        command: npx cds-pgroll run --schema my_schema
         memory: 256M
-  properties:
-    CDS_CONFIG: |
-      {
-        "requires": {
-          "db": {
-            "credentials": {
-              "schema": "my_schema"
-            }
-          }
-        }
-      }
   requires:
     - name: my-app-db
 

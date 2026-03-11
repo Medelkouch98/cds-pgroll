@@ -60,11 +60,12 @@ function printUsage() {
     apply        Run pending migrations against local/remote database
     status       Show migration status and pending migrations  
     prepare      Prepare db deployer (strip CSVs, configure CDS)
-    run          Full pipeline: auto-detect CSN changes + apply manual migrations
+    run          Alias for apply
 
   Options:
     --schema <name>        PostgreSQL schema (default: from package.json)
     --migrations <dir>     Migrations directory (default: ./migrations)
+    --model-only           Use cds-deploy --model-only (for prepare command)
     --help                 Show this help
 
   Configuration (in package.json):
@@ -97,9 +98,11 @@ async function main() {
   const config = loadConfig();
 
   // Parse flags
+  let modelOnly = false;
   for (let i = 1; i < args.length; i++) {
     if (args[i] === '--schema' && args[i + 1]) { config.schema = args[++i]; }
     else if (args[i] === '--migrations' && args[i + 1]) { config.migrationsDir = path.resolve(args[++i]); }
+    else if (args[i] === '--model-only') { modelOnly = true; }
   }
 
   switch (command) {
@@ -225,6 +228,7 @@ async function main() {
         projectRoot,
         schema: config.schema,
         schemaEvolution: config.schemaEvolution,
+        modelOnly,
         deployerDir: config.deployerDir,
       });
       break;

@@ -23,13 +23,20 @@ const { applyOperation } = require('./operations');
 const { PgRollSql } = require('./sql');
 
 /**
- * Get PostgreSQL connection config from VCAP_SERVICES (Cloud Foundry).
+ * Get PostgreSQL connection config from environment.
+ *
+ * Tries in order:
+ *   1. VCAP_SERVICES env var (Cloud Foundry)
+ *   2. DATABASE_URL env var (connection string)
+ *   3. default-env.json file (local development with CF credentials)
+ *   4. PG* env vars (PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE)
  *
  * @param {Object} [env] - Environment variables (default: process.env)
+ * @param {string} [projectRoot] - Project root for finding default-env.json
  * @returns {Object} pg Pool configuration
  */
-function getConnectionConfig(env = process.env) {
-  // CF environment
+function getConnectionConfig(env = process.env, projectRoot) {
+  // 1. CF environment
   if (env.VCAP_SERVICES) {
     const vcap = JSON.parse(env.VCAP_SERVICES);
     const pgService = vcap['postgresql-db']?.[0] || vcap['postgresql']?.[0];
@@ -47,12 +54,41 @@ function getConnectionConfig(env = process.env) {
     };
   }
 
-  // Local: connection string from DATABASE_URL
+  // 2. DATABASE_URL connection string
   if (env.DATABASE_URL) {
     return { connectionString: env.DATABASE_URL, ssl: { rejectUnauthorized: false } };
   }
 
-  throw new Error('No PostgreSQL connection config found. Set VCAP_SERVICES or DATABASE_URL.');
+  // 3. default-env.json (local development)
+  if (projectRoot) {
+    const localConfig = getLocalConnectionConfig(projectRoot);
+    if (localConfig) return localConfig;
+  } else {
+    // Try finding project root by walking up from cwd
+    let dir = process.cwd();
+    while (dir !== '/') {
+      const localConfig = getLocalConnectionConfig(dir);
+      if (localConfig) return localConfig;
+      dir = path.dirname(dir);
+    }
+  }
+
+  // 4. PostgreSQL env vars (PGHOST, PGPORT, etc.)
+  if (env.PGHOST || env.PGDATABASE) {
+    return {
+      host: env.PGHOST || 'localhost',
+      port: parseInt(env.PGPORT || '5432', 10),
+      user: env.PGUSER || 'postgres',
+      password: env.PGPASSWORD || '',
+      database: env.PGDATABASE || 'postgres',
+      ssl: env.PGSSLMODE === 'disable' ? false : { rejectUnauthorized: false },
+    };
+  }
+
+  throw new Error(
+    'No PostgreSQL connection config found.\n' +
+    'Set one of: VCAP_SERVICES, DATABASE_URL, default-env.json, or PGHOST/PGDATABASE env vars.'
+  );
 }
 
 /**
