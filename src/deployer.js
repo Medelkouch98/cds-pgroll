@@ -93,11 +93,10 @@ function prepareDataFiles(dataDir) {
  * @param {Object} options
  * @param {string} options.schema - PostgreSQL schema name
  * @param {string} [options.schemaEvolution='alter'] - CDS schema_evolution mode
- * @param {boolean} [options.modelOnly=false] - Use cds-deploy --model-only
  * @param {Array} [options.tables] - Discovered tables (for logging)
  */
 function updatePackageJson(packageJsonPath, options) {
-  const { schema, schemaEvolution = 'alter', modelOnly = false, tables = [] } = options;
+  const { schema, schemaEvolution = 'alter', tables = [] } = options;
 
   if (!fs.existsSync(packageJsonPath)) {
     throw new Error(`Cannot find deployer package.json at ${packageJsonPath}`);
@@ -105,7 +104,7 @@ function updatePackageJson(packageJsonPath, options) {
 
   const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
   pkg.scripts = pkg.scripts || {};
-  pkg.scripts.start = modelOnly ? 'cds-deploy --model-only' : 'cds-deploy';
+  pkg.scripts.start = 'cds-deploy --model-only';
 
   // Remove obsolete prestart hook if present
   if (pkg.scripts.prestart) delete pkg.scripts.prestart;
@@ -126,7 +125,7 @@ function updatePackageJson(packageJsonPath, options) {
   console.log(`  [deployer] Updated package.json:`);
   console.log(`    schema: ${schema}`);
   console.log(`    schema_evolution: ${schemaEvolution}`);
-  console.log(`    start: cds-deploy`);
+  console.log(`    start: cds-deploy --model-only`);
 
   if (tables.length > 0) {
     console.log(`  [deployer] ${tables.length} tables will be managed`);
@@ -140,7 +139,6 @@ function updatePackageJson(packageJsonPath, options) {
  * @param {string} options.projectRoot - Root of the CAP project
  * @param {string} options.schema - PostgreSQL schema name
  * @param {string} [options.schemaEvolution='alter'] - Schema evolution mode
- * @param {boolean} [options.modelOnly=false] - Use cds-deploy --model-only
  * @param {string} [options.deployerDir] - Path to gen/pg (auto-detected if omitted)
  */
 function prepare(options) {
@@ -148,7 +146,6 @@ function prepare(options) {
     projectRoot,
     schema,
     schemaEvolution = 'alter',
-    modelOnly = false,
     deployerDir = path.join(projectRoot, 'gen', 'pg'),
   } = options;
 
@@ -161,7 +158,7 @@ function prepare(options) {
   console.log(`    Deployer: ${deployerDir}`);
 
   const tables = prepareDataFiles(dataDir);
-  updatePackageJson(packageJsonPath, { schema, schemaEvolution, modelOnly, tables });
+  updatePackageJson(packageJsonPath, { schema, schemaEvolution, tables });
 
   console.log('  [deployer] Preparation complete');
   return { tables, deployerDir };

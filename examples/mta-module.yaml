@@ -15,10 +15,13 @@
 #       commands:
 #         - npm ci
 #         - npx cds build --production
-#         # Prepare db-deployer: strip CSVs, set --model-only, configure schema
-#         - npx cds-pgroll prepare --model-only
-#         # Copy migration files and CSN to gen/migrations for the migrator module
+#         # Prepare db-deployer (strip CSVs, set --model-only, configure schema)
+#         - npx cds-pgroll prepare
+#         # Copy the runner (provided by the package) and migration files
 #         - mkdir -p gen/migrations
+#         - cp -r node_modules/@cds-pgroll/postgres/bin/run-pgroll.js gen/migrations/
+#         - cp -r node_modules/@cds-pgroll gen/migrations/node_modules/@cds-pgroll
+#         - cp -r node_modules/pg gen/migrations/node_modules/pg
 #         - bash -c "cp migrations/*.json gen/migrations/ 2>/dev/null; exit 0"
 #         - cp gen/pg/db/csn.json gen/migrations/csn.json
 
@@ -40,8 +43,19 @@
     no-start: true
     tasks:
       - name: run-pgroll-migrations
-        command: npx cds-pgroll run --schema my_schema
+        command: node run-pgroll.js
         memory: 256M
+  properties:
+    CDS_CONFIG: |
+      {
+        "requires": {
+          "db": {
+            "credentials": {
+              "schema": "my_schema"
+            }
+          }
+        }
+      }
   requires:
     - name: my-app-db
 
