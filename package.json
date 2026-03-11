@@ -1,6 +1,6 @@
 {
   "name": "@cds-pgroll/postgres",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Hybrid schema migration library for SAP CAP + PostgreSQL. Complements @cap-js/postgres with DROP, RENAME, and destructive DDL operations via pgroll-compatible migrations.",
   "main": "src/index.js",
   "bin": {
