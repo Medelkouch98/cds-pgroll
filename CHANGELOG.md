@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/Medelkouch98/cds-pgroll/compare/v1.0.3...v1.0.4) (2026-03-11)
+
+
+### Bug Fixes
+
+* apply command local dev support, deployer --model-only, bundled run-pgroll.js ([0264bbd](https://github.com/Medelkouch98/cds-pgroll/commit/0264bbda8c97f61c39c68ce62de226ca3133f862))
+
 ## [1.0.3](https://github.com/Medelkouch98/cds-pgroll/compare/v1.0.2...v1.0.3) (2026-03-11)
 
 
