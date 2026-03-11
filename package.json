@@ -1,10 +1,10 @@
 {
   "name": "@cds-pgroll/postgres",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Hybrid schema migration library for SAP CAP + PostgreSQL. Complements @cap-js/postgres with DROP, RENAME, and destructive DDL operations via pgroll-compatible migrations.",
   "main": "src/index.js",
   "bin": {
-    "cds-pgroll": "./bin/cds-pgroll.js"
+    "cds-pgroll": "bin/cds-pgroll.js"
   },
   "scripts": {
     "test": "jest --testTimeout=15000",
@@ -29,7 +29,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Medelkouch98/cds-pgroll.git"
+    "url": "git+https://github.com/Medelkouch98/cds-pgroll.git"
   },
   "homepage": "https://github.com/Medelkouch98/cds-pgroll#readme",
   "bugs": {
@@ -45,8 +45,8 @@
     "pg": "^8.13.0"
   },
   "peerDependencies": {
-    "@sap/cds": ">=7",
-    "@cap-js/postgres": ">=1"
+    "@cap-js/postgres": ">=1",
+    "@sap/cds": ">=7"
   },
   "peerDependenciesMeta": {
     "@sap/cds": {
@@ -57,7 +57,10 @@
     }
   },
   "devDependencies": {
-    "jest": "^30.0.0"
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "jest": "^30.0.0",
+    "semantic-release": "^24.2.9"
   },
   "files": [
     "src/",
@@ -65,5 +68,33 @@
     "examples/",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogFile": "CHANGELOG.md"
+        }
+      ],
+      "@semantic-release/npm",
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json",
+            "package-lock.json",
+            "CHANGELOG.md"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ],
+      "@semantic-release/github"
+    ]
+  }
 }
