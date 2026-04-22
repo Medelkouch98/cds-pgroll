@@ -49,7 +49,9 @@ function getConnectionConfig(env = process.env) {
 
   // Local: connection string from DATABASE_URL
   if (env.DATABASE_URL) {
-    return { connectionString: env.DATABASE_URL, ssl: { rejectUnauthorized: false } };
+    const sslmode = env.PGSSLMODE || '';
+    const ssl = sslmode === 'disable' ? false : { rejectUnauthorized: false };
+    return { connectionString: env.DATABASE_URL, ssl };
   }
 
   throw new Error('No PostgreSQL connection config found. Set VCAP_SERVICES or DATABASE_URL.');
@@ -68,14 +70,16 @@ function getLocalConnectionConfig(projectRoot) {
     const env = JSON.parse(fs.readFileSync(envPath, 'utf-8'));
     const pgService = env.VCAP_SERVICES?.['postgresql-db']?.[0];
     if (!pgService?.credentials) return null;
-    const { hostname, port, username, password, dbname } = pgService.credentials;
+    const { hostname, port, username, password, dbname, sslrootcert, sslRequired } = pgService.credentials;
     return {
       host: hostname,
       port: parseInt(port, 10),
       user: username,
       password,
       database: dbname,
-      ssl: { rejectUnauthorized: false }
+      ssl: sslrootcert
+        ? { ca: sslrootcert, rejectUnauthorized: false }
+        : (sslRequired !== false ? { rejectUnauthorized: false } : false)
     };
   } catch {
     return null;
